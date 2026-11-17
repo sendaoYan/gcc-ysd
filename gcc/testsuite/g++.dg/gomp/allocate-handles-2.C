@@ -13,7 +13,8 @@
 template<omp_allocator_handle_t Alloc>
 void test_predefined_alloc()
 {
-  static int a = 42;
+  int a = 42; /* Not static: the *_mem_alloc allocators are invalid for
+                 static storage duration (see PR122892).  */
   #pragma omp allocate(a) allocator(Alloc)
 }
 
