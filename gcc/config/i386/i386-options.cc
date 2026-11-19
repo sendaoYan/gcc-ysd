@@ -1953,8 +1953,18 @@ ix86_override_options_after_change_1 (struct gcc_options *opts,
 #define OPTS(OPTION) opts->x_ ## OPTION
 
   /* Disable unrolling small loops when there's explicit
-     -f{,no}unroll-loop.  */
+     -f{,no}unroll-loop.
+
+     -fprofile-use enables -funroll-loops through enable_fdo_optimizations,
+     but that is not recorded in OPTS_SET, so without the second test the
+     defaults below would not follow it: -munroll-only-small-loops would
+     stay in effect and loops that GCC 11 unrolled would not be unrolled at
+     all.  Profile feedback is an explicit request to optimize for the
+     profile rather than something enabled by the optimization level, which
+     is what the small-loop restriction is meant to curb, so treat it like
+     an explicit -funroll-loops here.  */
   if ((OPTS_SET_P (flag_unroll_loops))
+     || (OPTS (flag_profile_use) && OPTS (flag_unroll_loops))
      || (OPTS_SET_P (flag_unroll_all_loops)
 	 && OPTS (flag_unroll_all_loops)))
     {
