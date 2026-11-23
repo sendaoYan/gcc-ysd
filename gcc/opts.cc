@@ -1542,6 +1542,17 @@ finish_options (struct gcc_options *opts, struct gcc_options *opts_set,
   if (opts->x_flag_openmp_ompt && !opts->x_flag_openmp)
     error_at (loc, "%<-fopenmp-ompt%> requires %<-fopenmp%>");
 
+  /* Profile feedback enabling -funroll-loops is as explicit a request as
+     -funroll-loops on the command line, and target hooks that only follow
+     an explicit -funroll-loops (for example the small-loop unrolling
+     restrictions on x86, rs6000, riscv and s390) rely on opts_set to see
+     one.  Record it here, after all options have been processed, so that
+     a later -fno-profile-use is honored.  */
+  if (opts->x_flag_profile_use
+      && opts->x_flag_unroll_loops
+      && !opts_set->x_flag_unroll_loops)
+    opts_set->x_flag_unroll_loops = 1;
+
   diagnose_options (opts, opts_set, loc);
 }
 
